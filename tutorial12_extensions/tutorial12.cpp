@@ -3,8 +3,13 @@
 #include <stdlib.h>
 #include <vector>
 
+#ifdef USE_GLAD
+// Include GLAD
+#include <glad/glad.h>
+#else
 // Include GLEW
 #include <GL/glew.h>
+#endif
 
 // Include GLFW
 #include <GLFW/glfw3.h>
@@ -75,9 +80,14 @@ int main( void )
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make macOS happy; should not be needed
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
+#ifdef USE_EGL
+	glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
 
 	// ARB_debug_output is a bit special, 
 	// it requires creating the OpenGL context
@@ -98,6 +108,30 @@ int main( void )
 	}
 	glfwMakeContextCurrent(window);
 
+#ifdef USE_GLAD
+	// Initialize GLAD
+	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress)) {
+		printf("Failed to initialize GLAD\n");
+		return -1;
+	}
+
+	// Example 1 :
+	if (GLAD_GL_ARB_seamless_cubemap_per_texture) {
+		printf("The GL_AMD_seamless_cubemap_per_texture is present, (but we're not goint to use it)\n");
+		// Now it's legal to call glTexParameterf with the TEXTURE_CUBE_MAP_SEAMLESS_ARB parameter
+		// You HAVE to test this, because obviously, this code would fail on non-AMD hardware.
+	}
+
+	// Example 2 :
+	if (GLAD_GL_ARB_debug_output) {
+		printf("The OpenGL implementation provides debug output. Let's use it !\n");
+		glDebugMessageCallbackARB(&DebugOutputCallback, NULL);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	}
+	else {
+		printf("ARB_debug_output unavailable. You have to use glGetError() and/or gDebugger to catch mistakes.\n");
+	}
+#else
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) {
@@ -108,20 +142,22 @@ int main( void )
 	}
 
 	// Example 1 :
-	if ( GLEW_AMD_seamless_cubemap_per_texture ){
+	if (GLEW_AMD_seamless_cubemap_per_texture) {
 		printf("The GL_AMD_seamless_cubemap_per_texture is present, (but we're not goint to use it)\n");
 		// Now it's legal to call glTexParameterf with the TEXTURE_CUBE_MAP_SEAMLESS_ARB parameter
 		// You HAVE to test this, because obviously, this code would fail on non-AMD hardware.
 	}
 
 	// Example 2 :
-	if ( GLEW_ARB_debug_output ){
+	if (GLEW_ARB_debug_output) {
 		printf("The OpenGL implementation provides debug output. Let's use it !\n");
 		glDebugMessageCallbackARB(&DebugOutputCallback, NULL);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB); 
-	}else{
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+	}
+	else {
 		printf("ARB_debug_output unavailable. You have to use glGetError() and/or gDebugger to catch mistakes.\n");
 	}
+#endif
 
 
 	// Ensure we can capture the escape key being pressed below

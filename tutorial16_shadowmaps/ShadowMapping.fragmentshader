@@ -1,4 +1,6 @@
-#version 330 core
+#version 310 es
+
+precision highp float;
 
 // Interpolated values from the vertex shaders
 in vec2 UV;

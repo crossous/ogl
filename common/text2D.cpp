@@ -1,7 +1,13 @@
 #include <vector>
 #include <cstring>
 
+#ifdef USE_GLAD
+// Include GLAD
+#include <glad/glad.h>
+#else
+// Include GLEW
 #include <GL/glew.h>
+#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

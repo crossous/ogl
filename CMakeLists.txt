@@ -15,7 +15,11 @@ if( CMAKE_BINARY_DIR MATCHES " " )
 	message( "Your Build Directory contains spaces. If you experience problems when compiling, this can be the cause." )
 endif()
 
+# 定义一个多选项变量，用于选择gl库
+set(GL_LIBRARY "GLAD" CACHE STRING "Choose an opengl library: GLEW, or GLAD")
+set_property(CACHE GL_LIBRARY PROPERTY STRINGS GLEW GLAD)
 
+option(USE_EGL "Use EGL Context" ON)
 
 # Compile external dependencies 
 add_subdirectory (external)
@@ -34,27 +38,45 @@ endif(INCLUDE_DISTRIB)
 
 include_directories(
 	external/AntTweakBar-1.16/include/
-	external/glfw-3.1.2/include/
+	external/glfw/include/
 	external/glm-0.9.7.1/
-	external/glew-1.13.0/include/
 	external/assimp-3.0.1270/include/
 	external/bullet-2.81-rev2613/src/
 	.
 )
 
+
 set(ALL_LIBS
-	${OPENGL_LIBRARY}
-	glfw
-	GLEW_1130
+${OPENGL_LIBRARY}
+glfw
 )
+
+if(GL_LIBRARY STREQUAL "GLEW")
+    include_directories(external/glew-1.13.0/include/)
+	list(APPEND ALL_LIBS GLEW_1130)
+	add_definitions(-DUSE_GLEW)
+	add_definitions(-DGLEW_STATIC)
+elseif(GL_LIBRARY STREQUAL "GLAD")
+    include_directories(external/glad_compatibility/include/)
+	list(APPEND ALL_LIBS GLAD)
+	add_definitions(-DUSE_GLAD)
+
+# GLEW对EGL支持不好，所以只在GLAD应用这一选项
+if (USE_EGL)
+	add_definitions(-DUSE_EGL)
+endif()
+
+endif()
 
 add_definitions(
 	-DTW_STATIC
 	-DTW_NO_LIB_PRAGMA
 	-DTW_NO_DIRECT3D
-	-DGLEW_STATIC
+	# -DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
+
+
 
 # Tutorial 1
 add_executable(tutorial01_first_window 
@@ -102,20 +124,33 @@ set_target_properties(tutorial03_matrices PROPERTIES XCODE_ATTRIBUTE_CONFIGURATI
 create_target_launcher(tutorial03_matrices WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial03_matrices/") # Visual
 
 # Tutorial 4
-add_executable(tutorial04_colored_cube
+set(TUTORIAL4_SOURCE_FILES 
 	tutorial04_colored_cube/tutorial04.cpp
 	common/shader.cpp
 	common/shader.hpp
 	
 	tutorial04_colored_cube/TransformVertexShader.vertexshader
-	tutorial04_colored_cube/ColorFragmentShader.fragmentshader
+	tutorial04_colored_cube/ColorFragmentShader.fragmentshader)
+
+if(GL_LIBRARY STREQUAL "GLAD")
+# list(APPEND TUTORIAL4_SOURCE_FILES external/glad_compatibility/src/glad.c)
+endif()
+
+
+add_executable(tutorial04_colored_cube
+	${TUTORIAL4_SOURCE_FILES}
 )
+
 target_link_libraries(tutorial04_colored_cube
 	${ALL_LIBS}
 )
+
 # Xcode and Visual working directories
 set_target_properties(tutorial04_colored_cube PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tutorial04_colored_cube/")
+
 create_target_launcher(tutorial04_colored_cube WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial04_colored_cube/")
+
+# target_compile_definitions(tutorial04_colored_cube PRIVATE USE_GLAD)
 
 # Tutorial 5
 add_executable(tutorial05_textured_cube

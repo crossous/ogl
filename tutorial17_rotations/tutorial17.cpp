@@ -3,8 +3,13 @@
 #include <stdlib.h>
 #include <vector>
  
+#ifdef USE_GLAD
+// Include GLAD
+#include <glad/glad.h>
+#else
 // Include GLEW
 #include <GL/glew.h>
+#endif
  
 // Include GLFW
 #include <GLFW/glfw3.h>
@@ -52,9 +57,14 @@ int main( void )
  
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make macOS happy; should not be needed
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
+#ifdef USE_EGL
+	glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
  
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow( 1024, 768, "Tutorial 17 - Rotations", NULL, NULL);
@@ -66,6 +76,13 @@ int main( void )
 	}
 	glfwMakeContextCurrent(window);
 
+#ifdef USE_GLAD
+	// Initialize GLAD
+	if (!gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress)) {
+		printf("Failed to initialize GLAD\n");
+		return -1;
+	}
+#else
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) {
@@ -74,6 +91,7 @@ int main( void )
 		glfwTerminate();
 		return -1;
 	}
+#endif
  
 	// Initialize the GUI
 	TwInit(TW_OPENGL_CORE, NULL);

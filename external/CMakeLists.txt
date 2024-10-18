@@ -7,17 +7,64 @@ add_definitions(
 	-DTW_STATIC
 	-DTW_NO_LIB_PRAGMA
 	-DTW_NO_DIRECT3D
-	-DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
+	
+
+### GLEW ###
+if(GL_LIBRARY STREQUAL "GLEW")
+
+set(GLEW_SOURCE
+	glew-1.13.0/src/glew.c
+)
+
+set(GLEW_HEADERS glew-1.13.0/include/GL/glew.h)
+
+add_library( GLEW_1130 STATIC
+	${GLEW_SOURCE}
+	${GLEW_HEADERS}
+)
+
+target_link_libraries(GLEW_1130
+	${OPENGL_LIBRARY}
+	${EXTRA_LIBS}
+)
+
+target_include_directories (GLEW_1130 PRIVATE glew-1.13.0/include)
+
+add_definitions(-DGLEW_STATIC)
+### GLAD ###
+elseif(GL_LIBRARY STREQUAL "GLAD")
+
+set(GLAD_SOURCE
+	glad_compatibility/src/glad.c
+)
+
+set(GLAD_HEADERS glad_compatibility/include/glad/glad.h)
+
+add_library( GLAD STATIC
+	${GLAD_SOURCE}
+	${GLAD_HEADERS}
+)
+
+target_include_directories (GLAD PRIVATE glad_compatibility/include)
+
+target_link_libraries(GLAD
+	${OPENGL_LIBRARY}
+	${EXTRA_LIBS}
+)
+
+endif()
+
+
 
 ### GLFW ###
-
+	
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation")
-add_subdirectory (glfw-3.1.2)
+add_subdirectory (glfw)
 
 include_directories(
-	glfw-3.1.2/include/GLFW/
+	glfw/include/GLFW/
 	glew-1.13.0/include/
 )
 
@@ -36,23 +83,6 @@ set(OPENGL_LIBRARY
 )
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-### GLEW ###
-
-set(GLEW_SOURCE
-	glew-1.13.0/src/glew.c
-)
-
-set(GLEW_HEADERS glew-1.13.0/include/GL/glew.h)
-
-add_library( GLEW_1130 STATIC
-	${GLEW_SOURCE}
-	${GLEW_HEADERS}
-)
-
-target_link_libraries(GLEW_1130
-	${OPENGL_LIBRARY}
-	${EXTRA_LIBS}
-)
 
 
 ### ANTTWEAKBAR ###
