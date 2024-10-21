@@ -1,0 +1,7 @@
+这一版本将GLFW升级为新版本
+
+为了将渲染从GLCore改为GLES，将GLEW切换为GLAD
+
+相比与原工程，在CMAKE选项中加入了GL_LIBRARY选项，用于指定GL库使用GLEW还是GLAD
+
+添加USE_EGL选项，只在GLAD下生效
