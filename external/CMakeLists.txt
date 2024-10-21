@@ -53,6 +53,26 @@ target_link_libraries(GLAD
 	${OPENGL_LIBRARY}
 	${EXTRA_LIBS}
 )
+### GLANGLE ###
+elseif(GL_LIBRARY STREQUAL "GLANGLE")
+
+set(GLANGLE_SOURCE
+	glangle/src/gles_loader_autogen.cpp
+)
+
+set(GLANGLE_HEADERS glangle/include/gles_loader_autogen.h)
+
+add_library( GLANGLE STATIC
+	${GLANGLE_SOURCE}
+	${GLANGLE_HEADERS}
+)
+
+target_include_directories (GLANGLE PRIVATE glangle/include)
+
+target_link_libraries(GLANGLE
+	${OPENGL_LIBRARY}
+	${EXTRA_LIBS}
+)
 
 endif()
 

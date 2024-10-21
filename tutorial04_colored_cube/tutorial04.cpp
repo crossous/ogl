@@ -5,9 +5,11 @@
 #ifdef USE_GLAD
 // Include GLAD
 #include <glad/glad.h>
-#else
+#elif USE_GLEW
 // Include GLEW
 #include <GL/glew.h>
+//#elif USE_GLANGLE
+//#include <gles_loader_autogen.h>
 #endif
 
 // Include GLFW
@@ -21,8 +23,13 @@ using namespace glm;
 
 #include <common/shader.hpp>
 
+#include <iostream>
+
 int main( void )
 {
+#if USE_GLANGLE
+	glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_D3D11);
+#endif
 	// Initialize GLFW
 	if( !glfwInit() )
 	{
@@ -31,12 +38,15 @@ int main( void )
 		return -1;
 	}
 
+	glfwSetErrorCallback([](int error, const char* description) { std::cout << "Error: " << description << std::endl; });
+
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make macOS happy; should not be needed
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+
 
 #ifdef USE_EGL
 	glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
@@ -58,7 +68,7 @@ int main( void )
 		printf("Failed to initialize GLAD\n");
 		return -1;
 	}
-#else
+#elif USE_GLEW
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) {
@@ -68,6 +78,9 @@ int main( void )
 		return -1;
 	}
 #endif
+//#elif USE_GLANGLE
+//	LoadUtilGLES();
+//#endif
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);

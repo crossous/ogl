@@ -25,6 +25,9 @@ using namespace glm;
 
 int main( void )
 {
+#if USE_GLANGLE
+	glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_D3D11);
+#endif
 	// Initialize GLFW
 	if( !glfwInit() )
 	{

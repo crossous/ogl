@@ -16,8 +16,8 @@ if( CMAKE_BINARY_DIR MATCHES " " )
 endif()
 
 # 定义一个多选项变量，用于选择gl库
-set(GL_LIBRARY "GLAD" CACHE STRING "Choose an opengl library: GLEW, or GLAD")
-set_property(CACHE GL_LIBRARY PROPERTY STRINGS GLEW GLAD)
+set(GL_LIBRARY "GLAD" CACHE STRING "Choose an opengl library: GLEW, or GLAD, or GLANGLE")
+set_property(CACHE GL_LIBRARY PROPERTY STRINGS GLEW GLAD GLANGLE)
 
 option(USE_EGL "Use EGL Context" ON)
 
@@ -61,12 +61,22 @@ elseif(GL_LIBRARY STREQUAL "GLAD")
 	list(APPEND ALL_LIBS GLAD)
 	add_definitions(-DUSE_GLAD)
 
-# GLEW对EGL支持不好，所以只在GLAD应用这一选项
-if (USE_EGL)
-	add_definitions(-DUSE_EGL)
+	# GLEW对EGL支持不好，所以只在GLAD应用这一选项
+	if (USE_EGL)
+		add_definitions(-DUSE_EGL)
+	endif()
+elseif(GL_LIBRARY STREQUAL "GLANGLE")
+	include_directories(external/glangle/include/)
+	list(APPEND ALL_LIBS GLANGLE)
+	add_definitions(-DUSE_GLANGLE)
+
+	if (USE_EGL)
+		add_definitions(-DUSE_EGL)
+	endif()
 endif()
 
-endif()
+
+
 
 add_definitions(
 	-DTW_STATIC
@@ -124,21 +134,13 @@ set_target_properties(tutorial03_matrices PROPERTIES XCODE_ATTRIBUTE_CONFIGURATI
 create_target_launcher(tutorial03_matrices WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial03_matrices/") # Visual
 
 # Tutorial 4
-set(TUTORIAL4_SOURCE_FILES 
+add_executable(tutorial04_colored_cube
 	tutorial04_colored_cube/tutorial04.cpp
 	common/shader.cpp
 	common/shader.hpp
-	
+
 	tutorial04_colored_cube/TransformVertexShader.vertexshader
-	tutorial04_colored_cube/ColorFragmentShader.fragmentshader)
-
-if(GL_LIBRARY STREQUAL "GLAD")
-# list(APPEND TUTORIAL4_SOURCE_FILES external/glad_compatibility/src/glad.c)
-endif()
-
-
-add_executable(tutorial04_colored_cube
-	${TUTORIAL4_SOURCE_FILES}
+	tutorial04_colored_cube/ColorFragmentShader.fragmentshader
 )
 
 target_link_libraries(tutorial04_colored_cube
@@ -149,8 +151,6 @@ target_link_libraries(tutorial04_colored_cube
 set_target_properties(tutorial04_colored_cube PROPERTIES XCODE_ATTRIBUTE_CONFIGURATION_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tutorial04_colored_cube/")
 
 create_target_launcher(tutorial04_colored_cube WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tutorial04_colored_cube/")
-
-# target_compile_definitions(tutorial04_colored_cube PRIVATE USE_GLAD)
 
 # Tutorial 5
 add_executable(tutorial05_textured_cube
