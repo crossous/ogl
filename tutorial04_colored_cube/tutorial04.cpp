@@ -27,6 +27,7 @@ using namespace glm;
 
 int main( void )
 {
+
 #if USE_GLANGLE
 	glfwInitHint(GLFW_ANGLE_PLATFORM_TYPE, GLFW_ANGLE_PLATFORM_TYPE_D3D11);
 #endif
@@ -77,10 +78,9 @@ int main( void )
 		glfwTerminate();
 		return -1;
 	}
-#endif
 //#elif USE_GLANGLE
 //	LoadUtilGLES();
-//#endif
+#endif
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);

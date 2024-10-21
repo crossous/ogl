@@ -16,10 +16,12 @@ if( CMAKE_BINARY_DIR MATCHES " " )
 endif()
 
 # 定义一个多选项变量，用于选择gl库
-set(GL_LIBRARY "GLAD" CACHE STRING "Choose an opengl library: GLEW, or GLAD, or GLANGLE")
-set_property(CACHE GL_LIBRARY PROPERTY STRINGS GLEW GLAD GLANGLE)
+set(GL_LIBRARY "GLAD" CACHE STRING "Choose an opengl library: GLEW, or GLAD")
+set_property(CACHE GL_LIBRARY PROPERTY STRINGS GLEW GLAD)
 
 option(USE_EGL "Use EGL Context" ON)
+
+option(USE_GLANGLE "Use GLANGLE" ON)
 
 # Compile external dependencies 
 add_subdirectory (external)
@@ -65,14 +67,19 @@ elseif(GL_LIBRARY STREQUAL "GLAD")
 	if (USE_EGL)
 		add_definitions(-DUSE_EGL)
 	endif()
-elseif(GL_LIBRARY STREQUAL "GLANGLE")
-	include_directories(external/glangle/include/)
-	list(APPEND ALL_LIBS GLANGLE)
-	add_definitions(-DUSE_GLANGLE)
 
-	if (USE_EGL)
+	if (USE_GLANGLE)
 		add_definitions(-DUSE_EGL)
+		add_definitions(-DUSE_GLANGLE)
 	endif()
+# elseif(GL_LIBRARY STREQUAL "GLANGLE")
+# 	include_directories(external/glangle/include/)
+# 	list(APPEND ALL_LIBS GLANGLE)
+# 	add_definitions(-DUSE_GLANGLE)
+
+# 	if (USE_EGL)
+# 		add_definitions(-DUSE_EGL)
+# 	endif()
 endif()
 
 

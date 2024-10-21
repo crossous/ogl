@@ -5,11 +5,12 @@
 #ifdef USE_GLAD
 // Include GLAD
 #include <glad/glad.h>
-#else
+#elif USE_GLEW
 // Include GLEW
 #include <GL/glew.h>
+//#elif USE_GLANGLE
+//#include <gles_loader_autogen.h>
 #endif
-
 
 // Include GLFW
 #include <GLFW/glfw3.h>
@@ -61,7 +62,7 @@ int main( void )
 		printf("Failed to initialize GLAD\n");
 		return -1;
 	}
-#else
+#elif USE_GLEW
 	// Initialize GLEW
 	glewExperimental = true; // Needed for core profile
 	if (glewInit() != GLEW_OK) {
@@ -70,7 +71,10 @@ int main( void )
 		glfwTerminate();
 		return -1;
 	}
+//#elif USE_GLANGLE
+//	LoadUtilGLES();
 #endif
+
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
